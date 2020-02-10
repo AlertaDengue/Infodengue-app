@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/services.dart';
+import 'package:infodengue_app/splashscreen.dart';
+
 
 
 void main() => runApp(MyApp());
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Infodengue'),
+      home: Splash(),
     );
   }
 }
@@ -41,12 +43,17 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
+
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
+
+
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  static final showCard = true; // Set to false to show Stack
 
   void _incrementCounter() {
     setState(() {
@@ -58,6 +65,13 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -93,21 +107,71 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
+            Center(child: showCard ? _buildCard() : _buildStack())
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+  Widget _buildCard() => SizedBox(
+    // This widget represents the state cards.
+    // Must read data from infodengue website.
+    height: 210,
+    child: Card(
+      child: Column(
+        children: [
+          ListTile(
+            title: Text('Rio de Janeiro',
+                style: TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text('Estatísticas:'),
+            leading: Icon(
+              Icons.location_city,
+              color: Colors.blue[500],
+            ),
+          ),
+          Divider(),
+          ListTile(
+            title: Text('(408) 555-1212',
+                style: TextStyle(fontWeight: FontWeight.w500)),
+            leading: Icon(
+              Icons.contact_phone,
+              color: Colors.blue[500],
+            ),
+          ),
+          ListTile(
+            title: Text('costa@example.com'),
+            leading: Icon(
+              Icons.contact_mail,
+              color: Colors.blue[500],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _buildStack() => Stack(
+    alignment: const Alignment(0.6, 0.6),
+    children: [
+      CircleAvatar(
+        backgroundImage: AssetImage('assets/icon.png'),
+        radius: 100,
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.black45,
+        ),
+        child: Text(
+          'Mia B',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ],
+  );
 }
+
+
