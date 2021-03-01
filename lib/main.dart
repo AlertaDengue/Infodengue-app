@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               ListTile(
-                title: Text('costa@example.com'),
+                title: Text('alerta_dengue@fiocruz.br'),
                 leading: Icon(
                   Icons.contact_mail,
                   color: Colors.blue[500],
