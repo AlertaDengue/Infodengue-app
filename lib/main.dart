@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infodengue_app/splashscreen.dart';
 
-
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -43,12 +41,8 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
-
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
-
-
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -71,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -113,65 +106,62 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
   Widget _buildCard() => SizedBox(
-    // This widget represents the state cards.
-    // Must read data from infodengue website.
-    height: 210,
-    child: Card(
-      child: Column(
+        // This widget represents the state cards.
+        // Must read data from infodengue website.
+        height: 210,
+        child: Card(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text('Rio de Janeiro', style: TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text('Estatísticas:'),
+                leading: Icon(
+                  Icons.location_city,
+                  color: Colors.blue[500],
+                ),
+              ),
+              Divider(),
+              ListTile(
+                title: Text('Twitter: @evigilancia2\nTelegram: @Evigibot', style: TextStyle(fontWeight: FontWeight.w500)),
+                leading: Icon(
+                  Icons.message,
+                  color: Colors.blue[500],
+                ),
+              ),
+              ListTile(
+                title: Text('costa@example.com'),
+                leading: Icon(
+                  Icons.contact_mail,
+                  color: Colors.blue[500],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildStack() => Stack(
+        alignment: const Alignment(0.6, 0.6),
         children: [
-          ListTile(
-            title: Text('Rio de Janeiro',
-                style: TextStyle(fontWeight: FontWeight.w500)),
-            subtitle: Text('Estatísticas:'),
-            leading: Icon(
-              Icons.location_city,
-              color: Colors.blue[500],
-            ),
+          CircleAvatar(
+            backgroundImage: AssetImage('assets/icon.png'),
+            radius: 100,
           ),
-          Divider(),
-          ListTile(
-            title: Text('(408) 555-1212',
-                style: TextStyle(fontWeight: FontWeight.w500)),
-            leading: Icon(
-              Icons.contact_phone,
-              color: Colors.blue[500],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black45,
             ),
-          ),
-          ListTile(
-            title: Text('costa@example.com'),
-            leading: Icon(
-              Icons.contact_mail,
-              color: Colors.blue[500],
+            child: Text(
+              'Mia B',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
-      ),
-    ),
-  );
-
-  Widget _buildStack() => Stack(
-    alignment: const Alignment(0.6, 0.6),
-    children: [
-      CircleAvatar(
-        backgroundImage: AssetImage('assets/icon.png'),
-        radius: 100,
-      ),
-      Container(
-        decoration: BoxDecoration(
-          color: Colors.black45,
-        ),
-        child: Text(
-          'Mia B',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ],
-  );
+      );
 }
-
-
