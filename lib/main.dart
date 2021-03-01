@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:infodengue_app/splashscreen.dart';
+import 'package:infodengue_app/idapi.dart';
 
 void main() => runApp(MyApp());
 
@@ -48,6 +50,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   static final showCard = true; // Set to false to show Stack
+  Future<List<Stats>> futureStats;
 
   void _incrementCounter() {
     setState(() {
@@ -63,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    futureStats = fetchStats('3304557', 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
@@ -104,45 +108,70 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      drawer: Drawer(
+        child: SafeArea(
+          right: false,
+          child: Center(
+            child: Column(
+              children: [
+                Text("Rio de Janeiro")
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildCard() => SizedBox(
-        // This widget represents the state cards.
-        // Must read data from infodengue website.
+  Widget _buildCard() =>
+      SizedBox(
+        // This widget represents the stats cards.
+        // Reads data from infodengue website.
         height: 210,
         child: Card(
           child: Column(
             children: [
               ListTile(
-                title: Text('Rio de Janeiro', style: TextStyle(fontWeight: FontWeight.w500)),
+                title: Text('Alerta da Semana',
+                    style: TextStyle(fontWeight: FontWeight.w500)),
                 subtitle: Text('Estatísticas:'),
                 leading: Icon(
                   Icons.location_city,
                   color: Colors.blue[500],
                 ),
               ),
-              Divider(),
-              ListTile(
-                title: Text('Twitter: @evigilancia2\nTelegram: @Evigibot', style: TextStyle(fontWeight: FontWeight.w500)),
-                leading: Icon(
-                  Icons.message,
-                  color: Colors.blue[500],
-                ),
-              ),
-              ListTile(
-                title: Text('costa@example.com'),
-                leading: Icon(
-                  Icons.contact_mail,
-                  color: Colors.blue[500],
-                ),
+              FutureBuilder <List<Stats>>(
+                future: futureStats,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                        children: [
+                          Text('Semana Epidemiológica: ${snapshot.data[2].SE}',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                    Text('Casos notificados: ${snapshot.data[2].casos}'),
+                    Text('Casos estimados: ${snapshot.data[2].casos_est}'),
+                    Text('Tweets: ${snapshot.data[2].tweet}'),
+                    Text('Rt: ${snapshot.data[2].Rt}'),
+                  ],
+                  );
+                  } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                  }
+
+                  // By default, show a loading spinner.
+                  return
+                  CircularProgressIndicator
+                  (
+                  );
+                },
               ),
             ],
           ),
         ),
       );
 
-  Widget _buildStack() => Stack(
+  Widget _buildStack() =>
+      Stack(
         alignment: const Alignment(0.6, 0.6),
         children: [
           CircleAvatar(
