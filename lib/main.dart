@@ -148,10 +148,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           Text('Semana Epidemiológica: ${snapshot.data[2].SE}',
                               style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
-                    Text('Casos notificados: ${snapshot.data[2].casos}'),
-                    Text('Casos estimados: ${snapshot.data[2].casos_est}'),
-                    Text('Tweets: ${snapshot.data[2].tweet}'),
-                    Text('Rt: ${snapshot.data[2].Rt}'),
+                          Text('Casos notificados: ${snapshot.data[2].casos}'),
+                          Text('Casos estimados: ${snapshot.data[2].casos_est}'),
+                          Text('Tweets: ${snapshot.data[2].tweet}'),
+                          Text('Rt: ${snapshot.data[2].Rt}'),
                   ],
                   );
                   } else if (snapshot.hasError) {
