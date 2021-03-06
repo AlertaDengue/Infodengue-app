@@ -66,10 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    var munimap = read_municipios();
-    // debugPrint("$munimap");
-    // var geoc = munimap['Rio de Janeiro'];
-    // debugPrint("$geoc");
     futureStats = fetchStats('3304557', 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
@@ -144,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 leading: Icon(
                   Icons.location_city,
                   color: Colors.blue[500],
-                  size: 50,
+                  size: 40,
                 ),
               ),
               Padding(padding: const EdgeInsets.all(16),
@@ -156,9 +152,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             2:Colors.yellow,
                             3: Colors.orange,
                             4: Colors.red};
-                          var se = snapshot.data[2].SE.toString();
-                          var ew = se.substring(se.length-2);
+
                           if (snapshot.hasData) {
+                            var se = snapshot.data[2].SE.toString();
+                            var ew = se.substring(se.length-2);
                             return Container(
                                 color: alertColors.values.toList()[snapshot.data[2].nivel],
                                 child: Column(

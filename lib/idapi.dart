@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
@@ -7,31 +8,28 @@ import 'dart:convert';
 import 'dart:io';
 
 
-String loadAsset()  {
-  String contents = new File('assets/munis.json').readAsStringSync();
-  // final contents =  await rootBundle.loadString('assets/munis.json');
-  return contents;
+Future<Map<String,dynamic>> loadMap() async {
+  String contents =  await rootBundle.loadString('assets/munis.json');
+  Map<String,dynamic> mapa = await json.decode(contents);
+  // print(mapa);
+  return mapa;
 }
 
-Map<String,int> read_municipios() {
-
-  // loadAsset().then((contents){
-  //   municipios = json.decode(contents);
-  //   return municipios;
-  // });
-  return json.decode(loadAsset());
+Future<int> getGeocode(map, name) async {
+  int geocode = await map[name];
+  return geocode;
 }
 
 
  Future<String> getLocation() async
 {
   Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  print('location: ${position.latitude}');
+  // print('location: ${position.latitude}');
   final coordinates = new Coordinates(position.latitude, position.longitude);
   var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
   var first = addresses.first;
-  print("${first.featureName} : ${first.addressLine}");
-  return first.featureName;
+  // print("${first.locality}, ${first.subLocality} : ${first.addressLine}");
+  return first.locality;
 }
 
 List<Stats> StatsFromJson(String str) =>
@@ -40,6 +38,11 @@ List<Stats> StatsFromJson(String str) =>
 
 Future<List<Stats>> fetchStats(geocode, disease) async {
   var url = r'https://info.dengue.mat.br/api/alertcity/';
+  var mapmuni = await loadMap();
+  // print(mapmuni);
+  String locname = await getLocation();
+  print(locname);
+  var geocode = await getGeocode(mapmuni, locname);
   var qParams = 'geocode=$geocode&disease=$disease&format=json&ew_start=05&ey_start=2021&ew_end=09&ey_end=2021';
   var full_url = Uri.parse(url).replace(query: qParams);
   final response = await http.get(full_url);
