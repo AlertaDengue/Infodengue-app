@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
@@ -31,7 +32,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -66,12 +66,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    var munimap = read_municipios();
+    // debugPrint("$munimap");
+    // var geoc = munimap['Rio de Janeiro'];
+    // debugPrint("$geoc");
     futureStats = fetchStats('3304557', 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
   @override
   Widget build(BuildContext context) {
+    ThemeData localTheme = Theme.of(context);
+    
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -114,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Center(
             child: Column(
               children: [
-                Text("Rio de Janeiro")
+                Text("Rio de Janeiro",style: localTheme.textTheme.headline4,)
               ],
             ),
           ),
@@ -126,45 +132,62 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildCard() =>
       SizedBox(
         // This widget represents the stats cards.
-        // Reads data from infodengue website.
+        // Reads data from infodengue API.
         height: 210,
         child: Card(
           child: Column(
             children: [
               ListTile(
-                title: Text('Alerta da Semana',
-                    style: TextStyle(fontWeight: FontWeight.w500)),
-                subtitle: Text('Estatísticas:'),
+                title: Text('Alerta Rio de Janeiro',
+                    style: Theme.of(context).textTheme.headline6),
+                subtitle: Text('Estatísticas:', style: Theme.of(context).textTheme.bodyText1),
                 leading: Icon(
                   Icons.location_city,
                   color: Colors.blue[500],
+                  size: 50,
                 ),
               ),
-              FutureBuilder <List<Stats>>(
-                future: futureStats,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Column(
-                        children: [
-                          Text('Semana Epidemiológica: ${snapshot.data[2].SE}',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
-                          Text('Casos notificados: ${snapshot.data[2].casos}'),
-                          Text('Casos estimados: ${snapshot.data[2].casos_est}'),
-                          Text('Tweets: ${snapshot.data[2].tweet}'),
-                          Text('Rt: ${snapshot.data[2].Rt}'),
-                  ],
-                  );
-                  } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                  }
+              Padding(padding: const EdgeInsets.all(16),
+                      child: FutureBuilder <List<Stats>>(
+                        future: futureStats,
+                        builder: (context, snapshot) {
+                          final Map<int, Color> alertColors= {
+                            1:Colors.green,
+                            2:Colors.yellow,
+                            3: Colors.orange,
+                            4: Colors.red};
+                          var se = snapshot.data[2].SE.toString();
+                          var ew = se.substring(se.length-2);
+                          if (snapshot.hasData) {
+                            return Container(
+                                color: alertColors.values.toList()[snapshot.data[2].nivel],
+                                child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text('Semana Epidemiológica: ${ew} de ${se.substring(0,4)}',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                                      Text('Casos notificados: ${snapshot.data[2].casos}'),
+                                      Text('Casos estimados: ${snapshot.data[2].casos_est}'),
+                                      Text('Tweets: ${snapshot.data[2].tweet}'),
+                                      Text('Rt: ${snapshot.data[2].Rt}'),
+                                    ],
+                                )
 
-                  // By default, show a loading spinner.
-                  return
-                  CircularProgressIndicator
-                  (
-                  );
-                },
-              ),
+                            );
+
+                          } else if (snapshot.hasError) {
+                            return Text("${snapshot.error}");
+                          }
+
+                          // By default, show a loading spinner.
+                          return
+                            CircularProgressIndicator
+                              (
+                            );
+                        },
+                      ),
+              )
+
             ],
           ),
         ),
