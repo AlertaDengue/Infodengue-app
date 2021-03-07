@@ -38,11 +38,11 @@ List<Stats> StatsFromJson(String str) =>
 
 Future<List<Stats>> fetchStats(geocode, disease) async {
   var url = r'https://info.dengue.mat.br/api/alertcity/';
-  var mapmuni = await loadMap();
+  // var mapmuni = await loadMap();
   // print(mapmuni);
   String locname = await getLocation();
   print(locname);
-  var geocode = await getGeocode(mapmuni, locname);
+  // var geocode = await getGeocode(mapmuni, locname);
   var qParams = 'geocode=$geocode&disease=$disease&format=json&ew_start=05&ey_start=2021&ew_end=09&ey_end=2021';
   var full_url = Uri.parse(url).replace(query: qParams);
   final response = await http.get(full_url);
@@ -83,5 +83,43 @@ class Stats {
   }
 }
 
+class Municipios {
+  String name_muni;
+  int code_muni;
+  String abbrev_state;
+  String nome;
 
+  Municipios({
+    this.name_muni,
+    this.code_muni,
+    this.abbrev_state,
+    this.nome
+  });
 
+  factory Municipios.fromJson(Map<String, dynamic> parsedJson) {
+    return Municipios(
+        name_muni: parsedJson['name_muni'] as String,
+        code_muni: parsedJson['code_muni'],
+        abbrev_state: parsedJson['abbrev_state'] as String,
+        nome: parsedJson['nome'] as String
+    );
+  }
+}
+
+class MunicipiosViewModel {
+  static List<Municipios> municipios;
+
+  static Future loadMunicipios() async {
+    try {
+      municipios = <Municipios>[];
+      String jsonString = await rootBundle.loadString('assets/munis.json');
+      List parsedJson = json.decode(jsonString);
+      // var categoryJson = parsedJson['municipios'] as List;
+      for (int i = 0; i < parsedJson.length; i++) {
+        municipios.add(new Municipios.fromJson(parsedJson[i]));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+}

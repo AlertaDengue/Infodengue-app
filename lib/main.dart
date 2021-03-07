@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:infodengue_app/splashscreen.dart';
 import 'package:infodengue_app/idapi.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
+
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -50,6 +52,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   static final showCard = true; // Set to false to show Stack
+  GlobalKey<AutoCompleteTextFieldState<Municipios>> key = new GlobalKey();
+  AutoCompleteTextField searchTextField;
+  TextEditingController controller = new TextEditingController();
+
   Future<List<Stats>> futureStats;
 
   void _incrementCounter() {
@@ -63,8 +69,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _loadMuns() async {
+    await MunicipiosViewModel.loadMunicipios();
+  }
+
   @override
   void initState() {
+    _loadMuns();
     super.initState();
     futureStats = fetchStats('3304557', 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -73,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     ThemeData localTheme = Theme.of(context);
-    
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -115,10 +126,55 @@ class _MyHomePageState extends State<MyHomePage> {
           right: false,
           child: Center(
             child: Column(
-              children: [
-                Text("Rio de Janeiro",style: localTheme.textTheme.headline4,)
-              ],
-            ),
+                children: <Widget>[
+                  Text("Selecione cidade:",
+                    style: localTheme.textTheme.headline5,),
+                  searchTextField = AutoCompleteTextField<Municipios>(
+                      style: new TextStyle(color: Colors.black, fontSize: 16.0),
+                      decoration: new InputDecoration(
+                          suffixIcon: Container(
+                            width: 85.0,
+                            height: 60.0,
+                          ),
+                          contentPadding: EdgeInsets.fromLTRB(
+                              10.0, 30.0, 10.0, 20.0),
+                          filled: true,
+                          hintText: 'Busque sua cidade',
+                          hintStyle: TextStyle(color: Colors.black)),
+                      itemSubmitted: (item) {
+                        setState(() =>
+                        searchTextField.textField.controller.text =
+                            item.nome);
+                      },
+                      clearOnSubmit: false,
+                      key: key,
+                      suggestions: MunicipiosViewModel.municipios,
+                      itemBuilder: (context, item) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(item.nome,
+                              style: TextStyle(
+                                  fontSize: 16.0
+                              ),),
+                            Padding(
+                              padding: EdgeInsets.all(15.0),
+                            ),
+                            Text(item.nome,
+                            )
+                          ],
+                        );
+                      },
+                      itemSorter: (a, b) {
+                        return a.nome.compareTo(b.nome);
+                      },
+                      itemFilter: (item, query) {
+                        return item.nome
+                            .toLowerCase()
+                            .startsWith(query.toLowerCase());
+                      }),
+                ]),
+            // ],
           ),
         ),
       ),
@@ -135,8 +191,14 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               ListTile(
                 title: Text('Alerta Rio de Janeiro',
-                    style: Theme.of(context).textTheme.headline6),
-                subtitle: Text('Estatísticas:', style: Theme.of(context).textTheme.bodyText1),
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .headline6),
+                subtitle: Text('Estatísticas:', style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyText1),
                 leading: Icon(
                   Icons.location_city,
                   color: Colors.blue[500],
@@ -144,45 +206,49 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Padding(padding: const EdgeInsets.all(16),
-                      child: FutureBuilder <List<Stats>>(
-                        future: futureStats,
-                        builder: (context, snapshot) {
-                          final Map<int, Color> alertColors= {
-                            1:Colors.green,
-                            2:Colors.yellow,
-                            3: Colors.orange,
-                            4: Colors.red};
+                child: FutureBuilder <List<Stats>>(
+                  future: futureStats,
+                  builder: (context, snapshot) {
+                    final Map<int, Color> alertColors = {
+                      1: Colors.green,
+                      2: Colors.yellow,
+                      3: Colors.orange,
+                      4: Colors.red};
 
-                          if (snapshot.hasData) {
-                            var se = snapshot.data[2].SE.toString();
-                            var ew = se.substring(se.length-2);
-                            return Container(
-                                color: alertColors.values.toList()[snapshot.data[2].nivel],
-                                child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Text('Semana Epidemiológica: ${ew} de ${se.substring(0,4)}',
-                                          style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
-                                      Text('Casos notificados: ${snapshot.data[2].casos}'),
-                                      Text('Casos estimados: ${snapshot.data[2].casos_est}'),
-                                      Text('Tweets: ${snapshot.data[2].tweet}'),
-                                      Text('Rt: ${snapshot.data[2].Rt}'),
-                                    ],
-                                )
+                    if (snapshot.hasData) {
+                      var se = snapshot.data[2].SE.toString();
+                      var ew = se.substring(se.length - 2);
+                      return Container(
+                          color: alertColors.values.toList()[snapshot.data[2]
+                              .nivel],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text('Semana Epidemiológica: ${ew} de ${se
+                                  .substring(0, 4)}',
+                                  style: TextStyle(fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.italic)),
+                              Text('Casos notificados: ${snapshot.data[2]
+                                  .casos}'),
+                              Text('Casos estimados: ${snapshot.data[2]
+                                  .casos_est}'),
+                              Text('Tweets: ${snapshot.data[2].tweet}'),
+                              Text('Rt: ${snapshot.data[2].Rt}'),
+                            ],
+                          )
 
-                            );
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text("${snapshot.error}");
+                    }
 
-                          } else if (snapshot.hasError) {
-                            return Text("${snapshot.error}");
-                          }
-
-                          // By default, show a loading spinner.
-                          return
-                            CircularProgressIndicator
-                              (
-                            );
-                        },
-                      ),
+                    // By default, show a loading spinner.
+                    return
+                      CircularProgressIndicator
+                        (
+                      );
+                  },
+                ),
               )
 
             ],
