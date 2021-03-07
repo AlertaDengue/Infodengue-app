@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static final showCard = true; // Set to false to show Stack
   GlobalKey<AutoCompleteTextFieldState<Municipios>> key = new GlobalKey();
   AutoCompleteTextField searchTextField;
+  Municipios item_selected = Municipios.fromJson({"name_muni":"Rio de Janeiro","code_muni":3304557,"abbrev_state":"RJ"});
   TextEditingController controller = new TextEditingController();
 
   Future<List<Stats>> futureStats;
@@ -77,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     _loadMuns();
     super.initState();
-    futureStats = fetchStats('3304557', 'dengue');
+    futureStats = fetchStats(item_selected.code_muni, 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
@@ -142,9 +143,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           hintText: 'Busque sua cidade',
                           hintStyle: TextStyle(color: Colors.black)),
                       itemSubmitted: (item) {
-                        setState(() =>
-                        searchTextField.textField.controller.text =
-                            item.nome);
+                        setState(() {
+                          searchTextField.textField.controller.text =
+                              item.nome;
+                          item_selected = item;
+                          futureStats = fetchStats(item.code_muni, 'dengue');
+                        }
+                        );
                       },
                       clearOnSubmit: false,
                       key: key,
@@ -153,14 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(item.nome,
+                            Text(item.name_muni,
                               style: TextStyle(
                                   fontSize: 16.0
                               ),),
                             Padding(
                               padding: EdgeInsets.all(15.0),
                             ),
-                            Text(item.nome,
+                            Text(item.abbrev_state,
                             )
                           ],
                         );
@@ -190,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: [
               ListTile(
-                title: Text('Alerta Rio de Janeiro',
+                title: Text('Alerta ${item_selected.name_muni} - ${item_selected.abbrev_state}',
                     style: Theme
                         .of(context)
                         .textTheme
