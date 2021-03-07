@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 
 Future<Map<String,dynamic>> loadMap() async {
@@ -41,7 +39,7 @@ Future<List<Stats>> fetchStats(geocode, disease) async {
   // var mapmuni = await loadMap();
   // print(mapmuni);
   String locname = await getLocation();
-  print(locname);
+  // print(locname);
   // var geocode = await getGeocode(mapmuni, locname);
   var qParams = 'geocode=$geocode&disease=$disease&format=json&ew_start=05&ey_start=2021&ew_end=09&ey_end=2021';
   var full_url = Uri.parse(url).replace(query: qParams);

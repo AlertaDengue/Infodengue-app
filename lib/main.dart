@@ -5,6 +5,7 @@ import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:infodengue_app/splashscreen.dart';
 import 'package:infodengue_app/idapi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(MyApp());
 
@@ -51,6 +52,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int _geocode = 3304557;
+  String _name = "Rio de Janeiro";
+  String _state = "RJ";
+
   static final showCard = true; // Set to false to show Stack
   GlobalKey<AutoCompleteTextFieldState<Municipios>> key = new GlobalKey();
   AutoCompleteTextField searchTextField;
@@ -77,9 +82,33 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _loadMuns();
+    _loadPrefs();
     super.initState();
     futureStats = fetchStats(item_selected.code_muni, 'dengue');
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+  }
+
+  //load preferences
+  _loadPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _geocode = (prefs.getInt('geocode') ?? 3304557);
+      item_selected.code_muni = _geocode;
+      _name = (prefs.getString('name') ?? "Rio de Janeiro");
+      item_selected.name_muni = _name;
+      _state = (prefs.getString('state') ?? "RJ");
+      item_selected.abbrev_state = _state;
+    });
+  }
+
+  //save preferences on selection of new city
+  _savePrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setInt('geocode', item_selected.code_muni);
+      prefs.setString('name', item_selected.name_muni);
+      prefs.setString('state', item_selected.abbrev_state);
+    });
   }
 
   @override
@@ -148,6 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               item.nome;
                           item_selected = item;
                           futureStats = fetchStats(item.code_muni, 'dengue');
+                          _savePrefs();
                         }
                         );
                       },
