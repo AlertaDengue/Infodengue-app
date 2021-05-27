@@ -6,6 +6,8 @@ import 'package:number_slide_animation/number_slide_animation.dart';
 import 'package:infodengue_app/splashscreen.dart';
 import 'package:infodengue_app/idapi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -55,6 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int _geocode = 3304557;
   String _name = "Rio de Janeiro";
   String _state = "RJ";
+  String _disease = "dengue";
+
 
   static final showCard = true; // Set to false to show Stack
   GlobalKey<AutoCompleteTextFieldState<Municipios>> key = new GlobalKey();
@@ -86,10 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _loadMuns();
-    _loadPrefs();
+    // _loadPrefs();
     super.initState();
-    futureStats = fetchStats(item_selected.code_muni, 'dengue');
+    futureStats = fetchStats(item_selected.code_muni, _disease);
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    _savePrefs();
   }
 
   //load preferences
@@ -102,6 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
       item_selected.name_muni = _name;
       _state = (prefs.getString('state') ?? "RJ");
       item_selected.abbrev_state = _state;
+      _disease = prefs.getString('disease');
     });
   }
 
@@ -112,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
       prefs.setInt('geocode', item_selected.code_muni);
       prefs.setString('name', item_selected.name_muni);
       prefs.setString('state', item_selected.abbrev_state);
+      prefs.setString('disease', _disease);
     });
   }
 
@@ -174,13 +181,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       contentPadding:
                           EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 20.0),
                       filled: true,
-                      hintText: 'Busque sua cidade',
-                      hintStyle: TextStyle(color: Colors.black)),
+                      hintText: item_selected.name_muni,
+                      hintStyle: TextStyle(color: Colors.blueGrey)),
                   itemSubmitted: (item) {
                     setState(() {
                       searchTextField.textField.controller.text = item.nome;
                       item_selected = item;
-                      futureStats = fetchStats(item.code_muni, 'dengue');
+                      futureStats = fetchStats(item.code_muni, _disease);
                       _savePrefs();
                     });
                   },
@@ -212,6 +219,31 @@ class _MyHomePageState extends State<MyHomePage> {
                         .toLowerCase()
                         .startsWith(query.toLowerCase());
                   }),
+              DropdownButton<String>(
+                value: _disease,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 16,
+                style: const TextStyle(color: Colors.blueAccent),
+                underline: Container(
+                  height: 2,
+                  color: Colors.blueAccent,
+                ),
+                onChanged: (String newValue) {
+                  setState(() {
+                    _disease = newValue;
+                    futureStats = fetchStats(item_selected.code_muni, _disease);
+                    _savePrefs();
+                  });
+                },
+                items: <String>['dengue', 'chikungunya', 'zika']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              )
             ]),
             // ],
           ),
@@ -228,9 +260,12 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: [
               ExpansionTile(
-                title: Text(
-                    'Alerta ${item_selected.name_muni} - ${item_selected.abbrev_state}',
+                title: new InkWell(
+                    child: Text(
+                    'Alerta ${item_selected.name_muni} - ${item_selected.abbrev_state}\n${_disease}.',
                     style: Theme.of(context).textTheme.headline6),
+                    onTap: () => launch('https://info.dengue.mat.br/alerta/${item_selected.code_muni}/dengue')
+                ),
                 subtitle: Text('Estatísticas:',
                     style: Theme.of(context).textTheme.bodyText1),
                 leading: Icon(
@@ -252,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     };
 
                     if (snapshot.hasData) {
-                      print(snapshot.data);
+                      // print(snapshot.data);
                       if (snapshot.data.length == 0) {
                         return Container(
                             color: Colors.grey,
