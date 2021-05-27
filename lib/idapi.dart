@@ -41,7 +41,7 @@ Future<List<Stats>> fetchStats(geocode, disease) async {
   String locname = await getLocation();
   // print(locname);
   // var geocode = await getGeocode(mapmuni, locname);
-  var qParams = 'geocode=$geocode&disease=$disease&format=json&ew_start=05&ey_start=2021&ew_end=09&ey_end=2021';
+  var qParams = 'geocode=$geocode&disease=$disease&format=json';//&ew_start=05&ey_start=2021&ew_end=09&ey_end=2021';
   var full_url = Uri.parse(url).replace(query: qParams);
   final response = await http.get(full_url);
   if (response.statusCode == 200) {

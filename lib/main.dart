@@ -59,7 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
   static final showCard = true; // Set to false to show Stack
   GlobalKey<AutoCompleteTextFieldState<Municipios>> key = new GlobalKey();
   AutoCompleteTextField searchTextField;
-  Municipios item_selected = Municipios.fromJson({"name_muni":"Rio de Janeiro","code_muni":3304557,"abbrev_state":"RJ"});
+  Municipios item_selected = Municipios.fromJson({
+    "name_muni": "Rio de Janeiro",
+    "code_muni": 3304557,
+    "abbrev_state": "RJ"
+  });
   TextEditingController controller = new TextEditingController();
 
   Future<List<Stats>> futureStats;
@@ -155,60 +159,60 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SafeArea(
           right: false,
           child: Center(
-            child: Column(
-                children: <Widget>[
-                  Text("Selecione cidade:",
-                    style: localTheme.textTheme.headline5,),
-                  searchTextField = AutoCompleteTextField<Municipios>(
-                      style: new TextStyle(color: Colors.black, fontSize: 16.0),
-                      decoration: new InputDecoration(
-                          suffixIcon: Container(
-                            width: 85.0,
-                            height: 60.0,
-                          ),
-                          contentPadding: EdgeInsets.fromLTRB(
-                              10.0, 30.0, 10.0, 20.0),
-                          filled: true,
-                          hintText: 'Busque sua cidade',
-                          hintStyle: TextStyle(color: Colors.black)),
-                      itemSubmitted: (item) {
-                        setState(() {
-                          searchTextField.textField.controller.text =
-                              item.nome;
-                          item_selected = item;
-                          futureStats = fetchStats(item.code_muni, 'dengue');
-                          _savePrefs();
-                        }
-                        );
-                      },
-                      clearOnSubmit: false,
-                      key: key,
-                      suggestions: MunicipiosViewModel.municipios,
-                      itemBuilder: (context, item) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(item.name_muni,
-                              style: TextStyle(
-                                  fontSize: 16.0
-                              ),),
-                            Padding(
-                              padding: EdgeInsets.all(15.0),
-                            ),
-                            Text(item.abbrev_state,
-                            )
-                          ],
-                        );
-                      },
-                      itemSorter: (a, b) {
-                        return a.nome.compareTo(b.nome);
-                      },
-                      itemFilter: (item, query) {
-                        return item.nome
-                            .toLowerCase()
-                            .startsWith(query.toLowerCase());
-                      }),
-                ]),
+            child: Column(children: <Widget>[
+              Text(
+                "Selecione cidade:",
+                style: localTheme.textTheme.headline5,
+              ),
+              searchTextField = AutoCompleteTextField<Municipios>(
+                  style: new TextStyle(color: Colors.black, fontSize: 16.0),
+                  decoration: new InputDecoration(
+                      suffixIcon: Container(
+                        width: 85.0,
+                        height: 60.0,
+                      ),
+                      contentPadding:
+                          EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 20.0),
+                      filled: true,
+                      hintText: 'Busque sua cidade',
+                      hintStyle: TextStyle(color: Colors.black)),
+                  itemSubmitted: (item) {
+                    setState(() {
+                      searchTextField.textField.controller.text = item.nome;
+                      item_selected = item;
+                      futureStats = fetchStats(item.code_muni, 'dengue');
+                      _savePrefs();
+                    });
+                  },
+                  clearOnSubmit: false,
+                  key: key,
+                  suggestions: MunicipiosViewModel.municipios,
+                  itemBuilder: (context, item) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          item.name_muni,
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(15.0),
+                        ),
+                        Text(
+                          item.abbrev_state,
+                        )
+                      ],
+                    );
+                  },
+                  itemSorter: (a, b) {
+                    return a.nome.compareTo(b.nome);
+                  },
+                  itemFilter: (item, query) {
+                    return item.nome
+                        .toLowerCase()
+                        .startsWith(query.toLowerCase());
+                  }),
+            ]),
             // ],
           ),
         ),
@@ -216,83 +220,89 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildCard() =>
-      SizedBox(
+  Widget _buildCard() => SizedBox(
         // This widget represents the stats cards.
         // Reads data from infodengue API.
         height: 210,
         child: Card(
           child: Column(
             children: [
-              ListTile(
-                title: Text('Alerta ${item_selected.name_muni} - ${item_selected.abbrev_state}',
-                    style: Theme
-                        .of(context)
-                        .textTheme
-                        .headline6),
-                subtitle: Text('Estatísticas:', style: Theme
-                    .of(context)
-                    .textTheme
-                    .bodyText1),
+              ExpansionTile(
+                title: Text(
+                    'Alerta ${item_selected.name_muni} - ${item_selected.abbrev_state}',
+                    style: Theme.of(context).textTheme.headline6),
+                subtitle: Text('Estatísticas:',
+                    style: Theme.of(context).textTheme.bodyText1),
                 leading: Icon(
                   Icons.location_city,
                   color: Colors.blue[500],
                   size: 40,
                 ),
               ),
-              Padding(padding: const EdgeInsets.all(16),
-                child: FutureBuilder <List<Stats>>(
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: FutureBuilder<List<Stats>>(
                   future: futureStats,
                   builder: (context, snapshot) {
                     final Map<int, Color> alertColors = {
                       1: Colors.green,
                       2: Colors.yellow,
                       3: Colors.orange,
-                      4: Colors.red};
+                      4: Colors.red
+                    };
 
                     if (snapshot.hasData) {
-                      var se = snapshot.data[2].SE.toString();
-                      var ew = se.substring(se.length - 2);
-                      return Container(
-                          color: alertColors.values.toList()[snapshot.data[2]
-                              .nivel],
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text('Semana Epidemiológica: ${ew} de ${se
-                                  .substring(0, 4)}',
-                                  style: TextStyle(fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic)),
-                              Text('Casos notificados: ${snapshot.data[2]
-                                  .casos}'),
-                              Text('Casos estimados: ${snapshot.data[2]
-                                  .casos_est}'),
-                              Text('Tweets: ${snapshot.data[2].tweet}'),
-                              Text('Rt: ${snapshot.data[2].Rt}'),
-                            ],
-                          )
-
-                      );
+                      print(snapshot.data);
+                      if (snapshot.data.length == 0) {
+                        return Container(
+                            color: Colors.grey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                    'Não há dados disponíveis para esta cidade.',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic)),
+                              ],
+                            ));
+                      } else {
+                        var yse = snapshot.data.last.SE.toString();
+                        var ano = yse.substring(0, 4);
+                        var ew = yse.substring(yse.length - 2);
+                        return Container(
+                            color: alertColors[snapshot.data.last.nivel],
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text('Semana Epidemiológica: ${ew} de ${ano}',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic)),
+                                Text(
+                                    'Casos notificados: ${snapshot.data.last.casos}'),
+                                Text(
+                                    'Casos estimados: ${snapshot.data.last.casos_est}'),
+                                Text('Tweets: ${snapshot.data.last.tweet}'),
+                                Text('Rt: ${snapshot.data.last.Rt}'),
+                              ],
+                            ));
+                      }
                     } else if (snapshot.hasError) {
                       return Text("${snapshot.error}");
                     }
 
                     // By default, show a loading spinner.
-                    return
-                      CircularProgressIndicator
-                        (
-                      );
+                    return CircularProgressIndicator();
                   },
                 ),
               )
-
             ],
           ),
         ),
       );
 
-  Widget _buildStack() =>
-      Stack(
+  Widget _buildStack() => Stack(
         alignment: const Alignment(0.6, 0.6),
         children: [
           CircleAvatar(
